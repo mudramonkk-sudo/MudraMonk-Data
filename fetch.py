@@ -1,5 +1,5 @@
-import os, json, datetime, urllib.request, urllib.parse
-T = os.environ["UPSTOX_TOKEN"]
+import os, json, datetime, urllib.request, urllib.parse, urllib.error
+T = os.environ["UPSTOX_TOKEN"].strip()
 K = {
  "NSE_INDEX|Nifty 50": "Nifty 50",
  "BSE_INDEX|SENSEX": "Sensex",
@@ -11,8 +11,13 @@ K = {
  "NSE_EQ|INE090A01021": "ICICI Bank",
 }
 url = "https://api.upstox.com/v2/market-quote/quotes?instrument_key=" + urllib.parse.quote(",".join(K))
-req = urllib.request.Request(url, headers={"Accept": "application/json", "Authorization": "Bearer " + T})
-d = json.load(urllib.request.urlopen(req, timeout=30))["data"]
+req = urllib.request.Request(url, headers={"Accept": "application/json", "Authorization": "Bearer " + T, "User-Agent": "Mozilla/5.0"})
+try:
+    d = json.load(urllib.request.urlopen(req, timeout=30))["data"]
+except urllib.error.HTTPError as e:
+    print("HTTP", e.code, e.read().decode()[:600])
+    print("token length:", len(T))
+    raise SystemExit(1)
 tok = {v.get("instrument_token"): v for v in d.values()}
 items = []
 for k, n in K.items():
@@ -26,7 +31,9 @@ for k, n in K.items():
         pct = round(ch * 100 / (p - ch), 2)
     items.append({"n": n, "p": p, "ch": ch, "pct": pct})
 if not items:
-    raise SystemExit("no data")
+    print("no matching data:", list(d.keys())[:10])
+    raise SystemExit(1)
 ist = datetime.timezone(datetime.timedelta(hours=5, minutes=30))
 out = {"updated": datetime.datetime.now(ist).strftime("%d %b %Y, %I:%M %p IST"), "items": items}
 json.dump(out, open("prices.json", "w"))
+print("ok", len(items))
