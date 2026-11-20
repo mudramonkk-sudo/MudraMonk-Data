@@ -1,4 +1,4 @@
-equity instruments 2766
-stock rows 2766 failed batches 0
+equity instruments 2768
+stock rows 2767 failed batches 0
 movers pool 59
 ok 8 movers stocks.json
