@@ -1,0 +1,4 @@
+Nifty 50 1D pts 0 daily pts 270
+Sensex 1D pts 0 daily pts 270
+Bank Nifty 1D pts 0 daily pts 270
+history.json written
