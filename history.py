@@ -37,6 +37,12 @@ def intraday(key):
         return rows[::5] if rows else rows
 
 
+def minutes_on(key, day):
+    """5-minute candles for a past trading day (used on weekends / before open)."""
+    k = urllib.parse.quote(key, safe="")
+    return get(f"https://api.upstox.com/v3/historical-candle/{k}/minutes/5/{day}/{day}")
+
+
 def daily(key):
     k = urllib.parse.quote(key, safe="")
     to = now.date().isoformat()
@@ -73,6 +79,16 @@ for name, key in INDICES.items():
             rec["daily"] = [[r[0][:10], round(r[4], 2)] for r in sorted(c, key=lambda r: r[0])]
     except Exception as e:
         print("daily failed", name, repr(e)[:200])
+    if not rec.get("d1") or (rec.get("daily") and rec.get("d1_date", "") < rec["daily"][-1][0]):
+        # market closed today: show the last trading day's 1D chart
+        try:
+            day = rec["daily"][-1][0]
+            c = minutes_on(key, day)
+            if c:
+                rec["d1"] = [list(p) for p in sorted((r[0][11:16], round(r[4], 2)) for r in c)]
+                rec["d1_date"] = day
+        except Exception as e:
+            print("last-day intraday failed", name, repr(e)[:200])
     if rec:
         out[name] = rec
     print(name, "1D pts", len(rec.get("d1", [])), "daily pts", len(rec.get("daily", [])))
