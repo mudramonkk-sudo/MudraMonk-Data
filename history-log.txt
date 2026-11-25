@@ -1,4 +1,4 @@
-Nifty 50 1D pts 36 daily pts 270
-Sensex 1D pts 36 daily pts 270
-Bank Nifty 1D pts 36 daily pts 270
+Nifty 50 1D pts 58 daily pts 270
+Sensex 1D pts 58 daily pts 270
+Bank Nifty 1D pts 58 daily pts 270
 history.json written
